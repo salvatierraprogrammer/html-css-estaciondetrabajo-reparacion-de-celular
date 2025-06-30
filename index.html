@@ -101,59 +101,71 @@
       color: #004d40;
     }
     /* Botones y select juntos con buen espaciado */
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: flex-end;
-    }
-    .actions button, .actions select {
-      flex: 1 1 auto;
-      min-width: 100px;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-    }
-    .actions button {
-      background-color: #00796b;
-      color: white;
-    }
-    .actions button:hover {
-      background-color: #004d40;
-    }
-    .actions select {
-      background-color: white;
-      border: 2px solid #00796b;
-      color: #00796b;
-      font-weight: 700;
-      padding-left: 0.75rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      background-image:
-        linear-gradient(45deg, transparent 50%, #00796b 50%),
-        linear-gradient(135deg, #00796b 50%, transparent 50%),
-        linear-gradient(to right, #ccc, #ccc);
-      background-position:
-        calc(100% - 20px) calc(1em + 2px),
-        calc(100% - 15px) calc(1em + 2px),
-        calc(100% - 25px) 0.7em;
-      background-size: 5px 5px, 5px 5px, 1px 1.5em;
-      background-repeat: no-repeat;
-    }
-    .actions select:hover {
-      border-color: #004d40;
-      color: #004d40;
-      background-image:
-        linear-gradient(45deg, transparent 50%, #004d40 50%),
-        linear-gradient(135deg, #004d40 50%, transparent 50%),
-        linear-gradient(to right, #aaa, #aaa);
-    }
+   .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;       /* Espacio entre elementos */
+  justify-content: flex-end;
+}
+
+.actions button,
+.actions select {
+  flex: 1 1 120px;   /* Crecen y encogen, ancho base 120px */
+  min-width: 100px;  /* No se achican demasiado */
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  background-color: #00796b;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.actions button:hover {
+  background-color: #004d40;
+}
+
+.actions select {
+  background-color: white;
+  border: 2px solid #00796b;
+  color: #00796b;
+  font-weight: 700;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #00796b 50%),
+    linear-gradient(135deg, #00796b 50%, transparent 50%),
+    linear-gradient(to right, #ccc, #ccc);
+  background-position:
+    calc(100% - 20px) calc(1em + 2px),
+    calc(100% - 15px) calc(1em + 2px),
+    calc(100% - 25px) 0.7em;
+  background-size: 5px 5px, 5px 5px, 1px 1.5em;
+  background-repeat: no-repeat;
+}
+
+.actions select:hover {
+  border-color: #004d40;
+  color: #004d40;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #004d40 50%),
+    linear-gradient(135deg, #004d40 50%, transparent 50%),
+    linear-gradient(to right, #aaa, #aaa);
+}
+
+/* En pantallas pequeñas los elementos ocupan toda la línea */
+@media (max-width: 600px) {
+  .actions button,
+  .actions select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
     /* Inputs y selects de formulario */
     input, select {
       padding: 0.6rem 0.75rem;
@@ -410,9 +422,19 @@
     <option value="tratamiento de equipos mojados">Tratamiento de equipos mojados</option>
   </optgroup>
 </select>
-
+<select onchange="buscarEnTecnicoCerca(this, '${modelo}')">
+  <option value="">🛒 Técnico Cerca</option>
+  <option value="módulo">Módulo</option>
+  <option value="placa de carga">Placa de carga</option>
+  <option value="batería">Batería</option>
+  <option value="pantalla">Pantalla</option>
+  <option value="flex de encendido">Flex de encendido</option>
+  <option value="auricular">Auricular</option>
+  <option value="micrófono">Micrófono</option>
+</select>
       </div>
     `;
+    
     return card;
   }
 
@@ -516,6 +538,60 @@
     window.open(url, '_blank');
     select.selectedIndex = 0;
   }
+function buscarEnTecnicoCerca(select, modelo) {
+  const repuesto = select.value;
+  if (!repuesto) return;
+
+  const query = encodeURIComponent(`${modelo} ${repuesto}`);
+  const url = `https://tienda.tecnicocerca.com/pais/1/home?search=${query}`;
+  
+  const iframe = document.createElement('iframe');
+  iframe.src = url;
+  iframe.style.width = '100%';
+  iframe.style.height = '600px';
+  iframe.style.border = 'none';
+
+  const modal = document.createElement('div');
+  modal.style.position = 'fixed';
+  modal.style.top = 0;
+  modal.style.left = 0;
+  modal.style.width = '100%';
+  modal.style.height = '100%';
+  modal.style.background = 'rgba(0,0,0,0.7)';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+  modal.style.zIndex = 9999;
+
+  const container = document.createElement('div');
+  container.style.width = '90%';
+  container.style.height = '80%';
+  container.style.background = '#fff';
+  container.style.borderRadius = '12px';
+  container.style.overflow = 'hidden';
+  container.appendChild(iframe);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'Cerrar';
+  closeBtn.style.position = 'absolute';
+  closeBtn.style.top = '20px';
+  closeBtn.style.right = '30px';
+  closeBtn.style.padding = '10px 15px';
+  closeBtn.style.background = '#c62828';
+  closeBtn.style.color = '#fff';
+  closeBtn.style.border = 'none';
+  closeBtn.style.fontSize = '16px';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.onclick = () => modal.remove();
+
+  modal.appendChild(container);
+  modal.appendChild(closeBtn);
+  document.body.appendChild(modal);
+
+  select.selectedIndex = 0;
+}
+
+
 
   // Cerrar modales al hacer clic fuera del contenido
   window.onclick = function(event) {

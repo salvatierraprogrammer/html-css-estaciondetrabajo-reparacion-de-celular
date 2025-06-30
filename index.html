@@ -224,6 +224,12 @@
         flex: 1 1 100%;
       }
     }
+    #listaProveedores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
   </style>
 </head>
 <body>
@@ -240,7 +246,10 @@
   <h2>Lista de Clientes</h2>
   <div id="listaClientes"></div>
 </div>
-
+<div class="container" style="margin-top: 3rem;">
+  <h2>Proveedores recomendados</h2>
+  <div id="listaProveedores"></div>
+</div>
 <!-- Modal Agregar -->
 <div class="modal" id="modalAgregar">
   <div class="modal-content">
@@ -358,14 +367,50 @@
         <button type="button" onclick="verCliente(this)">Ver</button>
         <button type="button" onclick="editarCliente(this)">Editar</button>
         <button type="button" onclick="eliminarTarjeta(this)">Eliminar</button>
-        <select onchange="buscarReparacionYoutube(this, '${modelo}')">
-          <option value="">🔍 Reparaciones</option>
-          <option value="cambiar batería">Cambiar batería</option>
-          <option value="soldar pin de carga">Soldar pin de carga</option>
-          <option value="soldar micrófono">Soldar micrófono</option>
-          <option value="desarmado">Desarmado</option>
-          <option value="diagnóstico técnico">Diagnóstico</option>
-        </select>
+       <select onchange="buscarReparacionYoutube(this, '${modelo}')">
+  <option value="">🔍 Reparaciones</option>
+  
+  <optgroup label="Batería y energía">
+    <option value="cambiar batería">Cambiar batería</option>
+    <option value="reparar conector de carga">Reparar conector de carga</option>
+    <option value="soldar pin de carga">Soldar pin de carga</option>
+    <option value="reemplazo de batería no original">Reemplazo de batería no original</option>
+  </optgroup>
+
+  <optgroup label="Audio y sensores">
+    <option value="soldar micrófono">Soldar micrófono</option>
+    <option value="cambiar altavoz">Cambiar altavoz</option>
+    <option value="cambiar auricular">Cambiar auricular</option>
+    <option value="reparar sensor de proximidad">Reparar sensor de proximidad</option>
+    <option value="reparar vibrador">Reparar vibrador</option>
+  </optgroup>
+
+  <optgroup label="Pantalla y táctil">
+    <option value="cambio de modulo">Cambio de modulo</option>
+    <option value="cambio de pantalla">Cambio de pantalla</option>
+    <option value="reparar pantalla táctil">Reparar pantalla táctil</option>
+    <option value="reemplazar cristal">Reemplazar cristal</option>
+  </optgroup>
+
+  <optgroup label="Software y diagnóstico">
+    <option value="diagnóstico técnico">Diagnóstico técnico</option>
+    <option value="formateo y reinstalación">Formateo y reinstalación</option>
+    <option value="recuperar datos">Recuperar datos</option>
+  </optgroup>
+
+  <optgroup label="Soldadura y hardware">
+    <option value="uso estación de soldado">Uso estación de soldado</option>
+    <option value="soldadura de piezas">Soldadura de piezas</option>
+    <option value="reparar placa madre">Reparar placa madre</option>
+  </optgroup>
+
+  <optgroup label="Otros">
+    <option value="desamble">Desarmado</option>
+    <option value="limpieza interna">Limpieza interna</option>
+    <option value="tratamiento de equipos mojados">Tratamiento de equipos mojados</option>
+  </optgroup>
+</select>
+
       </div>
     `;
     return card;
@@ -478,6 +523,41 @@
     if (event.target === modalVer) cerrarModalVer();
     if (event.target === modalEditar) cerrarModalEditar();
   }
+  const listaProveedores = document.getElementById('listaProveedores');
+
+const proveedores = [
+  {
+    nombre: "Sara Cell",
+    url: "https://www.google.com/search?client=ms-android-transsion&sca_esv=ccb8066356fd07b7&sxsrf=AE3TifNZ9ddV6PVLO3OFjnHrkj_Y0pAz3A:1750776581096&kgmid=/g/11b7251nrs&q=Sara+Cell&shndl=30&shem=lstuoe2&source=sh/x/loc/act/m1/2&kgs=66dea2436998a1d3"
+  },
+  {
+    nombre: "Técnico Cerca",
+    url: "https://tienda.tecnicocerca.com/pais/1/sucursal/26/home"
+  },
+  {
+    nombre: "El Celu",
+    url: "https://www.elcelu.com.ar/"
+  }
+];
+
+function crearTarjetaProveedor({nombre, url}) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <h3>${nombre}</h3>
+    <div class="card-details">
+      <p>Proveedor confiable para reparaciones y repuestos.</p>
+    </div>
+    <div class="actions">
+      <button onclick="window.open('${url}', '_blank')">Visitar sitio</button>
+    </div>
+  `;
+  return card;
+}
+
+proveedores.forEach(prov => {
+  listaProveedores.appendChild(crearTarjetaProveedor(prov));
+});
 </script>
 
 </body>

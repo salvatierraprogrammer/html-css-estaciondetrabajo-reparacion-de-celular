@@ -248,6 +248,9 @@
 
 <header>
   <h1>Gestión de Clientes - Reparaciones</h1>
+   <div id="contadorVisitas" style="margin-top: 0.5rem; font-weight: 700; font-size: 1.1rem; color: #fff;">
+    Cargando visitas...
+  </div>
 </header>
 
 <div class="container">
@@ -634,6 +637,34 @@ function crearTarjetaProveedor({nombre, url}) {
 proveedores.forEach(prov => {
   listaProveedores.appendChild(crearTarjetaProveedor(prov));
 });
+const contadorVisitasElem = document.getElementById('contadorVisitas');
+
+contadorVisitasElem.textContent = 'Cargando visitas... ⏳';
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function cargarVisitas(reintentos = 3) {
+  for (let i = 0; i < reintentos; i++) {
+    try {
+      const res = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+      if (!res.ok) throw new Error('Respuesta no OK');
+      const data = await res.json();
+      contadorVisitasElem.textContent = `Visitas: ${data.value}`;
+      return;
+    } catch (err) {
+      console.warn(`Intento ${i + 1} fallido:`, err);
+      if (i < reintentos - 1) {
+        await delay(1000);
+      }
+    }
+  }
+  contadorVisitasElem.textContent = 'No se pudo cargar el contador de visitas.';
+}
+
+cargarVisitas();
+
 </script>
 
 </body>

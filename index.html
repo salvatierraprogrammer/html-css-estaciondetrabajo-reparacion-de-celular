@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Administrador de Reparaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0; padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background-color: #00796b;
+      color: white;
+      padding: 1.25rem 2rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: 0.03em;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.2);
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+    }
+    button {
+      background-color: #00796b;
+      color: white;
+      padding: 0.6rem 1.4rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    /* Contenedor de tarjetas en grid responsive */
+    #listaClientes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    /* Tarjeta */
+    .card {
+      background-color: #e0f2f1;
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
+      box-shadow:
+        0 2px 8px rgb(0 0 0 / 0.08),
+        inset 0 0 8px rgb(255 255 255 / 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 280px;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      cursor: default;
+    }
+    .card:hover {
+      box-shadow:
+        0 8px 20px rgb(0 0 0 / 0.15),
+        inset 0 0 10px rgb(255 255 255 / 0.5);
+      transform: translateY(-4px);
+    }
+    .card h3 {
+      margin: 0 0 0.8rem 0;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #004d40;
+      letter-spacing: 0.03em;
+    }
+    /* Datos cliente: en lista vertical pero con espacios */
+    .card-details {
+      flex-grow: 1;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #004d4080;
+      margin-bottom: 1rem;
+    }
+    .card-details p {
+      margin: 0.28rem 0;
+      color: #004d40cc;
+      font-weight: 500;
+    }
+    .card-details p strong {
+      color: #004d40;
+    }
+    /* Botones y select juntos con buen espaciado */
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    .actions button, .actions select {
+      flex: 1 1 auto;
+      min-width: 100px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .actions button {
+      background-color: #00796b;
+      color: white;
+    }
+    .actions button:hover {
+      background-color: #004d40;
+    }
+    .actions select {
+      background-color: white;
+      border: 2px solid #00796b;
+      color: #00796b;
+      font-weight: 700;
+      padding-left: 0.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #00796b 50%),
+        linear-gradient(135deg, #00796b 50%, transparent 50%),
+        linear-gradient(to right, #ccc, #ccc);
+      background-position:
+        calc(100% - 20px) calc(1em + 2px),
+        calc(100% - 15px) calc(1em + 2px),
+        calc(100% - 25px) 0.7em;
+      background-size: 5px 5px, 5px 5px, 1px 1.5em;
+      background-repeat: no-repeat;
+    }
+    .actions select:hover {
+      border-color: #004d40;
+      color: #004d40;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #004d40 50%),
+        linear-gradient(135deg, #004d40 50%, transparent 50%),
+        linear-gradient(to right, #aaa, #aaa);
+    }
+    /* Inputs y selects de formulario */
+    input, select {
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      border-radius: 6px;
+      border: 1.8px solid #b0b0b0;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    input:focus, select:focus {
+      border-color: #00796b;
+      outline: none;
+      box-shadow: 0 0 5px #00796baa;
+    }
+    /* Botones submit en formulario */
+    button[type="submit"], button[type="button"] {
+      background-color: #00796b;
+      color: white;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    button[type="submit"]:hover, button[type="button"]:hover {
+      background-color: #004d40;
+    }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      box-sizing: border-box;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 25px rgb(0 0 0 / 0.2);
+    }
+    .modal-content h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #00796b;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: 0.03em;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+      .actions button, .actions select {
+        min-width: 0;
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Gestión de Clientes - Reparaciones</h1>
+</header>
+
+<div class="container">
+  <button onclick="abrirModalAgregar()">+ Agregar nuevo cliente</button>
+</div>
+
+<div class="container">
+  <h2>Lista de Clientes</h2>
+  <div id="listaClientes"></div>
+</div>
+
+<!-- Modal Agregar -->
+<div class="modal" id="modalAgregar">
+  <div class="modal-content">
+    <h3>Agregar nuevo cliente</h3>
+    <form id="clienteForm">
+      <input type="text" id="nombre" placeholder="Nombre del cliente" required />
+      <input type="text" id="marca" placeholder="Marca" required />
+      <input type="text" id="modelo" placeholder="Modelo" required />
+      <input type="text" id="telefono" placeholder="Teléfono" required />
+      <input type="text" id="problema" placeholder="Problema" required />
+      <input type="number" id="sena" placeholder="Seña (opcional)" />
+      <input type="number" id="presupuesto" placeholder="Presupuesto" required />
+      <select id="estado" required>
+        <option value="pendiente">Pendiente</option>
+        <option value="en proceso">En proceso</option>
+        <option value="completado">Completado</option>
+      </select>
+      <div>
+        <button type="submit">Guardar</button>
+        <button type="button" onclick="cerrarModalAgregar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Ver -->
+<div class="modal" id="modalVer">
+  <div class="modal-content">
+    <h3>Detalle de cliente</h3>
+    <div id="detalleCliente"></div>
+    <button onclick="cerrarModalVer()">Cerrar</button>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal" id="modalEditar">
+  <div class="modal-content">
+    <h3>Editar cliente</h3>
+    <form id="editarForm">
+      <input type="text" id="editNombre" placeholder="Nombre del cliente" required />
+      <input type="text" id="editMarca" placeholder="Marca" required />
+      <input type="text" id="editModelo" placeholder="Modelo" required />
+      <input type="text" id="editTelefono" placeholder="Teléfono" required />
+      <input type="text" id="editProblema" placeholder="Problema" required />
+      <input type="number" id="editSena" placeholder="Seña (opcional)" />
+      <input type="number" id="editPresupuesto" placeholder="Presupuesto" required />
+      <select id="editEstado" required>
+        <option value="pendiente">Pendiente</option>
+        <option value="en proceso">En proceso</option>
+        <option value="completado">Completado</option>
+      </select>
+      <div style="margin-top: 1rem;">
+        <button type="submit">Guardar</button>
+        <button type="button" onclick="cerrarModalEditar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const listaClientes = document.getElementById('listaClientes');
+  const clienteForm = document.getElementById('clienteForm');
+  const modalAgregar = document.getElementById('modalAgregar');
+  const modalVer = document.getElementById('modalVer');
+  const detalleCliente = document.getElementById('detalleCliente');
+  const modalEditar = document.getElementById('modalEditar');
+  const editarForm = document.getElementById('editarForm');
+
+  let tarjetaEditando = null;
+
+  // Abrir/Cerrar modales
+  function abrirModalAgregar() {
+    modalAgregar.style.display = 'flex';
+  }
+  function cerrarModalAgregar() {
+    modalAgregar.style.display = 'none';
+    clienteForm.reset();
+  }
+  function abrirModalVer() {
+    modalVer.style.display = 'flex';
+  }
+  function cerrarModalVer() {
+    modalVer.style.display = 'none';
+    detalleCliente.innerHTML = '';
+  }
+  function abrirModalEditar() {
+    modalEditar.style.display = 'flex';
+  }
+  function cerrarModalEditar() {
+    modalEditar.style.display = 'none';
+  }
+
+  // Crear tarjeta cliente
+  function crearTarjetaCliente({
+    fechaHora, nombre, marca, modelo, problema, telefono, sena, presupuesto, estado
+  }) {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // Guardar datos extras en dataset
+    card.dataset.problema = problema;
+    card.dataset.sena = sena;
+
+    card.innerHTML = `
+      <h3>${nombre}</h3>
+      <div class="card-details">
+        <p><strong>Fecha:</strong> ${fechaHora}</p>
+        <p><strong>Marca:</strong> ${marca}</p>
+        <p><strong>Modelo:</strong> ${modelo}</p>
+        <p><strong>Teléfono:</strong> ${telefono}</p>
+        <p><strong>Presupuesto:</strong> $${presupuesto}</p>
+        <p><strong>Estado:</strong> ${estado}</p>
+      </div>
+      <div class="actions">
+        <button type="button" onclick="verCliente(this)">Ver</button>
+        <button type="button" onclick="editarCliente(this)">Editar</button>
+        <button type="button" onclick="eliminarTarjeta(this)">Eliminar</button>
+        <select onchange="buscarReparacionYoutube(this, '${modelo}')">
+          <option value="">🔍 Reparaciones</option>
+          <option value="cambiar batería">Cambiar batería</option>
+          <option value="soldar pin de carga">Soldar pin de carga</option>
+          <option value="soldar micrófono">Soldar micrófono</option>
+          <option value="desarmado">Desarmado</option>
+          <option value="diagnóstico técnico">Diagnóstico</option>
+        </select>
+      </div>
+    `;
+    return card;
+  }
+
+  // Agregar cliente desde formulario
+  clienteForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const now = new Date();
+    const fechaHora = now.toLocaleString();
+
+    const nombre = document.getElementById('nombre').value.trim();
+    const marca = document.getElementById('marca').value.trim();
+    const modelo = document.getElementById('modelo').value.trim();
+    const problema = document.getElementById('problema').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const sena = document.getElementById('sena').value || "0";
+    const presupuesto = document.getElementById('presupuesto').value.trim();
+    const estado = document.getElementById('estado').value;
+
+    const tarjeta = crearTarjetaCliente({
+      fechaHora, nombre, marca, modelo, problema, telefono, sena, presupuesto, estado
+    });
+
+    listaClientes.appendChild(tarjeta);
+    cerrarModalAgregar();
+  });
+
+  // Mostrar detalle cliente en modal
+  function verCliente(boton) {
+    const card = boton.closest('.card');
+    detalleCliente.innerHTML = `
+      <p><strong>Fecha:</strong> ${card.querySelector('.card-details p:nth-of-type(1)').textContent.replace('Fecha: ', '')}</p>
+      <p><strong>Cliente:</strong> ${card.querySelector('h3').textContent}</p>
+      <p><strong>Marca:</strong> ${card.querySelector('.card-details p:nth-of-type(2)').textContent.replace('Marca: ', '')}</p>
+      <p><strong>Modelo:</strong> ${card.querySelector('.card-details p:nth-of-type(3)').textContent.replace('Modelo: ', '')}</p>
+      <p><strong>Teléfono:</strong> ${card.querySelector('.card-details p:nth-of-type(4)').textContent.replace('Teléfono: ', '')}</p>
+      <p><strong>Problema:</strong> ${card.dataset.problema}</p>
+      <p><strong>Seña:</strong> $${card.dataset.sena}</p>
+      <p><strong>Presupuesto:</strong> ${card.querySelector('.card-details p:nth-of-type(5)').textContent.replace('Presupuesto: ', '')}</p>
+      <p><strong>Estado:</strong> ${card.querySelector('.card-details p:nth-of-type(6)').textContent.replace('Estado: ', '')}</p>
+    `;
+    abrirModalVer();
+  }
+
+  // Cargar datos en modal editar
+  function editarCliente(boton) {
+    tarjetaEditando = boton.closest('.card');
+
+    document.getElementById('editNombre').value = tarjetaEditando.querySelector('h3').textContent;
+    document.getElementById('editMarca').value = tarjetaEditando.querySelector('.card-details p:nth-of-type(2)').textContent.replace('Marca: ', '');
+    document.getElementById('editModelo').value = tarjetaEditando.querySelector('.card-details p:nth-of-type(3)').textContent.replace('Modelo: ', '');
+    document.getElementById('editTelefono').value = tarjetaEditando.querySelector('.card-details p:nth-of-type(4)').textContent.replace('Teléfono: ', '');
+    document.getElementById('editProblema').value = tarjetaEditando.dataset.problema || '';
+    document.getElementById('editSena').value = tarjetaEditando.dataset.sena || '0';
+    document.getElementById('editPresupuesto').value = tarjetaEditando.querySelector('.card-details p:nth-of-type(5)').textContent.replace('Presupuesto: $', '');
+    document.getElementById('editEstado').value = tarjetaEditando.querySelector('.card-details p:nth-of-type(6)').textContent.replace('Estado: ', '');
+
+    abrirModalEditar();
+  }
+
+  // Guardar cambios de edición
+  editarForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!tarjetaEditando) return;
+
+    const nombre = document.getElementById('editNombre').value.trim();
+    const marca = document.getElementById('editMarca').value.trim();
+    const modelo = document.getElementById('editModelo').value.trim();
+    const telefono = document.getElementById('editTelefono').value.trim();
+    const problema = document.getElementById('editProblema').value.trim();
+    const sena = document.getElementById('editSena').value || "0";
+    const presupuesto = document.getElementById('editPresupuesto').value.trim();
+    const estado = document.getElementById('editEstado').value;
+
+    tarjetaEditando.querySelector('h3').textContent = nombre;
+    tarjetaEditando.querySelector('.card-details p:nth-of-type(2)').textContent = `Marca: ${marca}`;
+    tarjetaEditando.querySelector('.card-details p:nth-of-type(3)').textContent = `Modelo: ${modelo}`;
+    tarjetaEditando.querySelector('.card-details p:nth-of-type(4)').textContent = `Teléfono: ${telefono}`;
+    tarjetaEditando.querySelector('.card-details p:nth-of-type(5)').textContent = `Presupuesto: $${presupuesto}`;
+    tarjetaEditando.querySelector('.card-details p:nth-of-type(6)').textContent = `Estado: ${estado}`;
+
+    tarjetaEditando.dataset.problema = problema;
+    tarjetaEditando.dataset.sena = sena;
+
+    cerrarModalEditar();
+  });
+
+  // Eliminar tarjeta con confirmación
+  function eliminarTarjeta(boton) {
+    if (confirm("¿Seguro que deseas eliminar este cliente?")) {
+      boton.closest('.card').remove();
+    }
+  }
+
+  // Buscar tutorial en YouTube
+  function buscarReparacionYoutube(select, modelo) {
+    const reparacion = select.value;
+    if (!reparacion) return;
+    const query = encodeURIComponent(`${modelo} ${reparacion}`);
+    const url = `https://www.youtube.com/results?search_query=${query}`;
+    window.open(url, '_blank');
+    select.selectedIndex = 0;
+  }
+
+  // Cerrar modales al hacer clic fuera del contenido
+  window.onclick = function(event) {
+    if (event.target === modalAgregar) cerrarModalAgregar();
+    if (event.target === modalVer) cerrarModalVer();
+    if (event.target === modalEditar) cerrarModalEditar();
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Administrador de Reparaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0; padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background-color: #00796b;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #eee;
+    }
+    input, select {
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #00796b;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+    button:hover {
+      background-color: #005f56;
+    }
+    .actions button {
+      margin-right: 5px;
+      font-size: 0.9rem;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 500px;
+      box-sizing: border-box;
+    }
+    .actions button:nth-child(4) {
+      background-color: #e53935;
+    }
+    .actions button:nth-child(4):hover {
+      background-color: #c62828;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Gestión de Clientes - Reparaciones</h1>
+</header>
+
+<div class="container">
+  <button onclick="abrirModalAgregar()">+ Agregar nuevo cliente</button>
+</div>
+
+<div class="container">
+  <h2>Lista de Clientes</h2>
+  <table id="tablaClientes">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Teléfono</th>
+        <th>Presupuesto</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Modal Agregar -->
+<div class="modal" id="modalAgregar">
+  <div class="modal-content">
+    <h3>Agregar nuevo cliente</h3>
+    <form id="clienteForm">
+      <input type="text" id="nombre" placeholder="Nombre del cliente" required />
+      <input type="text" id="marca" placeholder="Marca" required />
+      <input type="text" id="modelo" placeholder="Modelo" required />
+      <input type="text" id="telefono" placeholder="Teléfono" required />
+      <input type="text" id="problema" placeholder="Problema" required />
+      <input type="number" id="sena" placeholder="Seña (opcional)" />
+      <input type="number" id="presupuesto" placeholder="Presupuesto" required />
+      <select id="estado">
+        <option value="pendiente">Pendiente</option>
+        <option value="en proceso">En proceso</option>
+        <option value="completado">Completado</option>
+      </select>
+      <button type="submit">Guardar</button>
+      <button type="button" onclick="cerrarModalAgregar()">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Ver -->
+<div class="modal" id="modalVer">
+  <div class="modal-content">
+    <h3>Detalle de cliente</h3>
+    <div id="detalleCliente"></div>
+    <button onclick="cerrarModalVer()">Cerrar</button>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal" id="modalEditar">
+  <div class="modal-content">
+    <h3>Editar cliente</h3>
+    <form id="editarForm">
+      <input type="text" id="editNombre" placeholder="Nombre del cliente" required />
+      <input type="text" id="editMarca" placeholder="Marca" required />
+      <input type="text" id="editModelo" placeholder="Modelo" required />
+      <input type="text" id="editTelefono" placeholder="Teléfono" required />
+      <input type="text" id="editProblema" placeholder="Problema" required />
+      <input type="number" id="editSena" placeholder="Seña (opcional)" />
+      <input type="number" id="editPresupuesto" placeholder="Presupuesto" required />
+      <select id="editEstado">
+        <option value="pendiente">Pendiente</option>
+        <option value="en proceso">En proceso</option>
+        <option value="completado">Completado</option>
+      </select>
+      <div style="margin-top: 1rem;">
+        <button type="submit">Guardar</button>
+        <button type="button" onclick="cerrarModalEditar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const clienteForm = document.getElementById('clienteForm');
+  const tabla = document.getElementById('tablaClientes').querySelector('tbody');
+  const modalAgregar = document.getElementById('modalAgregar');
+  const modalVer = document.getElementById('modalVer');
+  const detalleCliente = document.getElementById('detalleCliente');
+  const modalEditar = document.getElementById('modalEditar');
+  let filaEditando = null;
+
+  function abrirModalAgregar() {
+    modalAgregar.style.display = 'flex';
+  }
+
+  function cerrarModalAgregar() {
+    modalAgregar.style.display = 'none';
+    clienteForm.reset();
+  }
+
+  function abrirModalVer() {
+    modalVer.style.display = 'flex';
+  }
+
+  function cerrarModalVer() {
+    modalVer.style.display = 'none';
+    detalleCliente.innerHTML = '';
+  }
+
+  function abrirModalEditar() {
+    modalEditar.style.display = 'flex';
+  }
+
+  function cerrarModalEditar() {
+    modalEditar.style.display = 'none';
+  }
+
+  clienteForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const now = new Date();
+    const fechaHora = now.toLocaleString();
+
+    const nombre = document.getElementById('nombre').value.trim();
+    const marca = document.getElementById('marca').value.trim();
+    const modelo = document.getElementById('modelo').value.trim();
+    const problema = document.getElementById('problema').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const sena = document.getElementById('sena').value || "0";
+    const presupuesto = document.getElementById('presupuesto').value.trim();
+    const estado = document.getElementById('estado').value;
+
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${fechaHora}</td>
+      <td>${nombre}</td>
+      <td>${marca}</td>
+      <td>${modelo}</td>
+      <td>${telefono}</td>
+      <td>$${presupuesto}</td>
+      <td>${estado}</td>
+      <td class="actions">
+        <button onclick="verCliente(this)">Ver</button>
+        <button onclick="editarCliente(this)">Editar</button>
+        <button onclick="eliminarFila(this)">Eliminar</button>
+       <select onchange="buscarReparacionYoutube(this, '${modelo}')">
+  <option value="">🔍 Reparaciones</option>
+  <option value="cambiar batería">Cambiar batería</option>
+  <option value="soldar pin de carga">Soldar pin de carga</option>
+  <option value="soldar micrófono">Soldar micrófono</option>
+  <option value="desarmado">Desarmado</option>
+  <option value="diagnóstico técnico">Diagnóstico</option>
+</select>
+      </td>
+    `;
+
+    fila.dataset.problema = problema;
+    fila.dataset.sena = sena;
+
+    tabla.appendChild(fila);
+    cerrarModalAgregar();
+  });
+
+  function verCliente(boton) {
+    const fila = boton.closest('tr');
+    detalleCliente.innerHTML = `
+      <p><strong>Fecha:</strong> ${fila.children[0].textContent}</p>
+      <p><strong>Cliente:</strong> ${fila.children[1].textContent}</p>
+      <p><strong>Marca:</strong> ${fila.children[2].textContent}</p>
+      <p><strong>Modelo:</strong> ${fila.children[3].textContent}</p>
+      <p><strong>Teléfono:</strong> ${fila.children[4].textContent}</p>
+      <p><strong>Problema:</strong> ${fila.dataset.problema}</p>
+      <p><strong>Seña:</strong> $${fila.dataset.sena}</p>
+      <p><strong>Presupuesto:</strong> ${fila.children[5].textContent}</p>
+      <p><strong>Estado:</strong> ${fila.children[6].textContent}</p>
+    `;
+    abrirModalVer();
+  }
+
+  function editarCliente(boton) {
+    filaEditando = boton.closest('tr');
+    document.getElementById('editNombre').value = filaEditando.children[1].textContent;
+    document.getElementById('editMarca').value = filaEditando.children[2].textContent;
+    document.getElementById('editModelo').value = filaEditando.children[3].textContent;
+    document.getElementById('editTelefono').value = filaEditando.children[4].textContent;
+    document.getElementById('editProblema').value = filaEditando.dataset.problema || '';
+    document.getElementById('editSena').value = filaEditando.dataset.sena || '0';
+    document.getElementById('editPresupuesto').value = filaEditando.children[5].textContent.replace('$', '');
+    document.getElementById('editEstado').value = filaEditando.children[6].textContent;
+    abrirModalEditar();
+  }
+
+  document.getElementById('editarForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (!filaEditando) return;
+
+    const nombre = document.getElementById('editNombre').value.trim();
+    const marca = document.getElementById('editMarca').value.trim();
+    const modelo = document.getElementById('editModelo').value.trim();
+    const telefono = document.getElementById('editTelefono').value.trim();
+    const problema = document.getElementById('editProblema').value.trim();
+    const sena = document.getElementById('editSena').value || "0";
+    const presupuesto = document.getElementById('editPresupuesto').value.trim();
+    const estado = document.getElementById('editEstado').value;
+
+    filaEditando.children[1].textContent = nombre;
+    filaEditando.children[2].textContent = marca;
+    filaEditando.children[3].textContent = modelo;
+    filaEditando.children[4].textContent = telefono;
+    filaEditando.children[5].textContent = `$${presupuesto}`;
+    filaEditando.children[6].textContent = estado;
+
+    filaEditando.dataset.problema = problema;
+    filaEditando.dataset.sena = sena;
+
+    cerrarModalEditar();
+  });
+
+  function eliminarFila(boton) {
+    if (confirm("¿Seguro que deseas eliminar este cliente?")) {
+      boton.closest('tr').remove();
+    }
+  }
+
+  function buscarEnYoutube(modelo) {
+    const query = encodeURIComponent(`desamble ${modelo}`);
+    const url = `https://www.youtube.com/results?search_query=${query}`;
+    window.open(url, "_blank");
+  }
+  function buscarReparacionYoutube(select, modelo) {
+  const reparacion = select.value;
+  if (!reparacion) return;
+  const query = encodeURIComponent(`${modelo} ${reparacion}`);
+  const url = `https://www.youtube.com/results?search_query=${query}`;
+  window.open(url, '_blank');
+  select.selectedIndex = 0; // volver al placeholder
+}
+
+  window.addEventListener('click', function(e) {
+    if (e.target === modalAgregar) cerrarModalAgregar();
+    if (e.target === modalVer) cerrarModalVer();
+    if (e.target === modalEditar) cerrarModalEditar();
+  });
+</script>
+
+</body>
+</html>
